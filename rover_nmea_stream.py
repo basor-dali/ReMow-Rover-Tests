@@ -22,12 +22,13 @@ def run():
         while True:
             try:
                 coords = gps.geo_coords()
+                stream = gps.stream_nmea()
                 latitude = coords.lat
                 longitude = coords.lon
-                print(f"Latitude: {latitude}, Longitude: {longitude}")
-                telemetry_with_ts = {"values": {"latitude": latitude, "longitude": longitude}}
+                telemetry = {"values": {"stream": stream, "latitude": latitude, "longitude": longitude}}
                 # Send POST request to the endpoint with telemetry data as JSON payload
-                response = requests.post(tb_url, json=telemetry_with_ts)
+                response = requests.post(tb_url, json=telemetry)
+                print(f"telemetry: {telemetry}")
                 # Check the response status code
                 if response.status_code == 200:
                     print("Telemetry data sent successfully!")
@@ -42,4 +43,5 @@ def run():
         port.close()
 
 if __name__ == '__main__':
+    time.sleep(60)
     run()
