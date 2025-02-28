@@ -92,6 +92,8 @@ def main():
     print(f"Desired Right Actuator Position (DRAP) = {DRAP}, Send Output Command")
     print("De-Energize Electronic Blade Clutch Control Solenoid")
 
+    record_process = None
+
     while True:
         print("Waiting for user input...")
         mode = get_mode()
@@ -111,7 +113,7 @@ def main():
                     print(f"Mow ID: {mow_id}")
                     GPIO.output(GREEN_LED, GPIO.HIGH)  # Light up green LED
                     # Trigger recordDataToCsv.py with the Mow ID
-                    subprocess.Popen(['python', 'recordDataToCsv.py', mow_id])
+                    record_process = subprocess.Popen(['python', 'recordDataToCsv.py', mow_id])
                     break
         elif mode == "B":  # RE-MOW
             print("RE-MOW mode selected")
@@ -122,9 +124,14 @@ def main():
         elif mode == "C":  # MOW MANUALLY
             print("MOW MANUALLY mode selected")
             print("Energize Electronic Blade Clutch Control Solenoid")
-        elif mode == "D":  # PAUSE/CONTINUE
-            print("PAUSE/CONTINUE mode selected")
-            # Additional logic for pause/continue
+        elif mode == "D":  # STOP
+            print("STOP mode selected")
+            if record_process:
+                record_process.terminate()  # Terminate the recordDataToCsv.py process
+                record_process = None
+            print("Desired Left Actuator Position (DLAP) = 0.0, Send Output Command")
+            print("Desired Right Actuator Position (DRAP) = 0.0, Send Output Command")
+            print("De-Energize Electronic Blade Clutch Control Solenoid")
         else:
             print("Invalid mode selected")
 

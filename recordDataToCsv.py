@@ -5,6 +5,16 @@ from time import strftime, sleep
 import csv
 import logging
 import sys
+import os
+import RPi.GPIO as GPIO
+
+# GPIO pin number for the GREEN LED
+GREEN_LED = 17
+
+# Initialize GPIO
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(GREEN_LED, GPIO.OUT)
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -54,8 +64,13 @@ def extract_gps_data(gps):
 # Main function to run the GPS data logging
 def run(mow_id):
     logging.info("Listening for UBX Messages.")
+    
+    # Create the "Data" directory if it doesn't exist
+    data_dir = os.path.join(os.path.dirname(__file__), 'Data')
+    os.makedirs(data_dir, exist_ok=True)
+    
     # Create a new CSV file with Mow ID and date/time in the filename
-    filename = f"{mow_id}_{strftime('%Y%m%d-%H%M%S')}_GPSData.csv"
+    filename = os.path.join(data_dir, f"{mow_id}_{strftime('%Y%m%d-%H%M%S')}_GPSData.csv")
     with open(filename, 'w', newline='') as csvfile:
         fieldnames = ['timestamp', 'latitude', 'longitude', 'relPosN', 'relPosE', 'relPosD', 'relPosLength', 'relPosHeading', 'velN', 'velE', 'velD', 'speed']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -72,12 +87,19 @@ def run(mow_id):
                         writer.writerow(telemetry)
                         csvfile.flush()  # Ensure data is written to the file
                         logging.info(f"Data written to CSV: {telemetry}")
+                        
+                        # Flash GREEN LED
+                        GPIO.output(GREEN_LED, GPIO.HIGH)
+                        sleep(0.1)
+                        GPIO.output(GREEN_LED, GPIO.LOW)
                     sleep(1)  # Wait for 1 second before recording the next set of data
 
             except KeyboardInterrupt:
                 logging.info("Program interrupted by user")
             except Exception as e:
                 logging.error(f"Unexpected error: {e}")
+            finally:
+                GPIO.cleanup()  # Clean up GPIO settings
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
