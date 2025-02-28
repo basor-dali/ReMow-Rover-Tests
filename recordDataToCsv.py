@@ -4,6 +4,7 @@ from ublox_gps import UbloxGps
 from time import strftime, sleep
 import csv
 import logging
+import sys
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -51,12 +52,10 @@ def extract_gps_data(gps):
         return None
 
 # Main function to run the GPS data logging
-def run():
-    logging.info("Program will start after 1 minute.")
-    sleep(60)  # Sleep for 1 minute (60 seconds)
+def run(mow_id):
     logging.info("Listening for UBX Messages.")
-    # Create a new CSV file with date and time in the filename
-    filename = strftime("%Y%m%d-%H%M%S") + '_GPSData.csv'
+    # Create a new CSV file with Mow ID and date/time in the filename
+    filename = f"{mow_id}_{strftime('%Y%m%d-%H%M%S')}_GPSData.csv"
     with open(filename, 'w', newline='') as csvfile:
         fieldnames = ['timestamp', 'latitude', 'longitude', 'relPosN', 'relPosE', 'relPosD', 'relPosLength', 'relPosHeading', 'velN', 'velE', 'velD', 'speed']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -81,4 +80,8 @@ def run():
                 logging.error(f"Unexpected error: {e}")
 
 if __name__ == '__main__':
-    run()  # Run the main function
+    if len(sys.argv) != 2:
+        print("Usage: python recordDataToCsv.py <MowID>")
+        sys.exit(1)
+    mow_id = sys.argv[1]
+    run(mow_id)  # Run the main function with the provided Mow ID
