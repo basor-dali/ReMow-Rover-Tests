@@ -16,8 +16,15 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GREEN_LED, GPIO.OUT)
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Create the "Logs" directory if it doesn't exist
+log_dir = os.path.join(os.path.dirname(__file__), 'Logs')
+os.makedirs(log_dir, exist_ok=True)
+
+# Log file path with a unique name based on the current timestamp
+log_file = os.path.join(log_dir, f'recordDataToCsv_{strftime("%Y%m%d-%H%M%S")}.log')
+
+# Initialize logging with timestamp in every log message
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename=log_file, filemode='w')
 
 # Function to extract GPS data with error handling
 def extract_gps_data(gps):

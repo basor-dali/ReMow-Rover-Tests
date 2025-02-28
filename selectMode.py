@@ -2,6 +2,8 @@ import RPi.GPIO as GPIO
 import time
 import os
 import subprocess
+import logging
+from time import strftime
 
 # GPIO pin numbers for the keypad
 L1 = 5
@@ -38,6 +40,16 @@ GPIO.setup(C4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(GREEN_LED, GPIO.OUT)
 GPIO.setup(RED_LED, GPIO.OUT)
 
+# Create the "Logs" directory if it doesn't exist
+log_dir = os.path.join(os.path.dirname(__file__), 'Logs')
+os.makedirs(log_dir, exist_ok=True)
+
+# Log file path with a unique name based on the current timestamp
+log_file = os.path.join(log_dir, f'selectMode_{strftime("%Y%m%d-%H%M%S")}.log')
+
+# Initialize logging with timestamp in every log message
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename=log_file, filemode='w')
+
 # Function to read a line of the keypad
 def readLine(line, characters):
     GPIO.output(line, GPIO.HIGH)  # Set the line to high
@@ -73,7 +85,7 @@ def read_2_digit_combination():
         digit = get_mode()
         if digit.isdigit():
             digits += digit
-            print(f"Digit entered: {digit}")
+            logging.info(f"Digit entered: {digit}")
     return digits
 
 # Function to check if a Mow ID already exists
@@ -85,55 +97,55 @@ def check_mow_id(mow_id):
 
 # Main function
 def main():
-    print("Initializing Output Settings")
+    logging.info("Initializing Output Settings")
     DLAP = 0.0
     DRAP = 0.0
-    print(f"Desired Left Actuator Position (DLAP) = {DLAP}, Send Output Command")
-    print(f"Desired Right Actuator Position (DRAP) = {DRAP}, Send Output Command")
-    print("De-Energize Electronic Blade Clutch Control Solenoid")
+    logging.info(f"Desired Left Actuator Position (DLAP) = {DLAP}, Send Output Command")
+    logging.info(f"Desired Right Actuator Position (DRAP) = {DRAP}, Send Output Command")
+    logging.info("De-Energize Electronic Blade Clutch Control Solenoid")
 
     record_process = None
 
     while True:
-        print("Waiting for user input...")
+        logging.info("Waiting for user input...")
         mode = get_mode()
-        print(f"User selected mode: {mode}")
+        logging.info(f"User selected mode: {mode}")
 
         if mode == "A":  # RECORD
-            print("RECORD mode selected")
+            logging.info("RECORD mode selected")
             while True:
-                print("Enter 2-digit Mow ID:")
+                logging.info("Enter 2-digit Mow ID:")
                 mow_id = read_2_digit_combination()
                 if check_mow_id(mow_id):
-                    print("Mow ID already exists. Please enter a new Mow ID.")
+                    logging.info("Mow ID already exists. Please enter a new Mow ID.")
                     GPIO.output(RED_LED, GPIO.HIGH)  # Light up red LED
                     time.sleep(2)
                     GPIO.output(RED_LED, GPIO.LOW)  # Turn off red LED
                 else:
-                    print(f"Mow ID: {mow_id}")
+                    logging.info(f"Mow ID: {mow_id}")
                     GPIO.output(GREEN_LED, GPIO.HIGH)  # Light up green LED
                     # Trigger recordDataToCsv.py with the Mow ID
                     record_process = subprocess.Popen(['python', 'recordDataToCsv.py', mow_id])
                     break
         elif mode == "B":  # RE-MOW
-            print("RE-MOW mode selected")
-            print("Enter 2-digit Mow ID:")
+            logging.info("RE-MOW mode selected")
+            logging.info("Enter 2-digit Mow ID:")
             mow_id = read_2_digit_combination()
-            print(f"Mow ID: {mow_id}")
+            logging.info(f"Mow ID: {mow_id}")
             # Additional logic for re-mowing
         elif mode == "C":  # MOW MANUALLY
-            print("MOW MANUALLY mode selected")
-            print("Energize Electronic Blade Clutch Control Solenoid")
+            logging.info("MOW MANUALLY mode selected")
+            logging.info("Energize Electronic Blade Clutch Control Solenoid")
         elif mode == "D":  # STOP
-            print("STOP mode selected")
+            logging.info("STOP mode selected")
             if record_process:
                 record_process.terminate()  # Terminate the recordDataToCsv.py process
                 record_process = None
-            print("Desired Left Actuator Position (DLAP) = 0.0, Send Output Command")
-            print("Desired Right Actuator Position (DRAP) = 0.0, Send Output Command")
-            print("De-Energize Electronic Blade Clutch Control Solenoid")
+            logging.info("Desired Left Actuator Position (DLAP) = 0.0, Send Output Command")
+            logging.info("Desired Right Actuator Position (DRAP) = 0.0, Send Output Command")
+            logging.info("De-Energize Electronic Blade Clutch Control Solenoid")
         else:
-            print("Invalid mode selected")
+            logging.info("Invalid mode selected")
 
         time.sleep(1)
 
@@ -141,5 +153,5 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\nApplication stopped!")
+        logging.info("\nApplication stopped!")
         GPIO.cleanup()
