@@ -6,15 +6,10 @@ import csv
 import logging
 import sys
 import os
-import RPi.GPIO as GPIO
+from gpiozero import LED
 
 # GPIO pin number for the GREEN LED
-GREEN_LED = 17
-
-# Initialize GPIO
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(GREEN_LED, GPIO.OUT)
+GREEN_LED = LED(17)
 
 # Create the "Logs" directory if it doesn't exist
 log_dir = os.path.join(os.path.dirname(__file__), 'Logs')
@@ -96,9 +91,9 @@ def run(mow_id):
                         logging.info(f"Data written to CSV: {telemetry}")
                         
                         # Flash GREEN LED
-                        GPIO.output(GREEN_LED, GPIO.HIGH)
+                        GREEN_LED.on()
                         sleep(0.1)
-                        GPIO.output(GREEN_LED, GPIO.LOW)
+                        GREEN_LED.off()
                     sleep(1)  # Wait for 1 second before recording the next set of data
 
             except KeyboardInterrupt:
@@ -106,7 +101,7 @@ def run(mow_id):
             except Exception as e:
                 logging.error(f"Unexpected error: {e}")
             finally:
-                GPIO.cleanup()  # Clean up GPIO settings
+                pass  # No need to clean up GPIO with gpiozero
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
