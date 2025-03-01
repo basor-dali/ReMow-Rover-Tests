@@ -1,0 +1,4 @@
+RPi.GPIO
+psutil
+pyserial
+ublox-gps

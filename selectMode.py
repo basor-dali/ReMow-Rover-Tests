@@ -4,6 +4,7 @@ import os
 import subprocess
 import logging
 from time import strftime
+import psutil
 
 # GPIO pin numbers for the keypad
 L1 = 5
@@ -95,6 +96,13 @@ def check_mow_id(mow_id):
             return True
     return False
 
+# Function to check if there is at least 10% free memory
+def check_memory():
+    memory = psutil.virtual_memory()
+    free_memory_percentage = memory.available / memory.total * 100
+    logging.info(f"Free memory: {free_memory_percentage:.2f}%")
+    return free_memory_percentage >= 10
+
 # Main function
 def main():
     logging.info("Initializing Output Settings")
@@ -122,11 +130,30 @@ def main():
                     time.sleep(2)
                     GPIO.output(RED_LED, GPIO.LOW)  # Turn off red LED
                 else:
-                    logging.info(f"Mow ID: {mow_id}")
-                    GPIO.output(GREEN_LED, GPIO.HIGH)  # Light up green LED
-                    # Trigger recordDataToCsv.py with the Mow ID
-                    record_process = subprocess.Popen(['python', 'recordDataToCsv.py', mow_id])
-                    break
+                    if check_memory():
+                        logging.info(f"Mow ID: {mow_id}")
+                        GPIO.output(GREEN_LED, GPIO.HIGH)  # Light up green LED
+                        # Trigger recordDataToCsv.py with the Mow ID
+                        record_process = subprocess.Popen(['python', 'recordDataToCsv.py', mow_id])
+                        while True:
+                            stop_mode = get_mode()
+                            if stop_mode == "D":  # STOP
+                                logging.info("STOP mode selected")
+                                if record_process:
+                                    record_process.terminate()  # Terminate the recordDataToCsv.py process
+                                    record_process = None
+                                logging.info("Desired Left Actuator Position (DLAP) = 0.0, Send Output Command")
+                                logging.info("Desired Right Actuator Position (DRAP) = 0.0, Send Output Command")
+                                logging.info("De-Energize Electronic Blade Clutch Control Solenoid")
+                                GPIO.output(GREEN_LED, GPIO.LOW)  # Turn off green LED
+                                break
+                        break
+                    else:
+                        logging.info("Not enough free memory to start recording.")
+                        GPIO.output(RED_LED, GPIO.HIGH)  # Light up red LED
+                        time.sleep(2)
+                        GPIO.output(RED_LED, GPIO.LOW)  # Turn off red LED
+                        break
         elif mode == "B":  # RE-MOW
             logging.info("RE-MOW mode selected")
             logging.info("Enter 2-digit Mow ID:")
