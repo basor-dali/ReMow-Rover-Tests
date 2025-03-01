@@ -27,18 +27,22 @@ def extract_gps_data(gps):
         coords = gps.geo_coords()  # Get geographic coordinates
         hp_coords = gps.hp_geo_coords()  # Get high precision geographic coordinates
 
+        # Log the coords and hp_coords objects
+        logging.info(f"coords: {coords}")
+        logging.info(f"hp_coords: {hp_coords}")
+
         # Extract data with error handling
         latitude = coords.lat if coords else None  # degrees
         longitude = coords.lon if coords else None  # degrees
-        relPosN = (hp_coords.relPosHPN / 1000) if hp_coords else None  # meters (m)
-        relPosE = (hp_coords.relPosHPE / 1000) if hp_coords else None  # meters (m)
-        relPosD = (hp_coords.relPosHPD / 1000) if hp_coords else None  # meters (m)
-        relPosLength = (hp_coords.relPosHPLength / 1000) if hp_coords else None  # meters (m)
-        relPosHeading = hp_coords.relPosHeading if hp_coords else None  # degrees
-        velN = (hp_coords.velN / 1000) if hp_coords else None  # meters per second (m/s)
-        velE = (hp_coords.velE / 1000) if hp_coords else None  # meters per second (m/s)
-        velD = (hp_coords.velD / 1000) if hp_coords else None  # meters per second (m/s)
-        speed = (hp_coords.speed / 1000) if hp_coords else None  # meters per second (m/s)
+        relPosN = (hp_coords.relPosHPN / 1000) if hasattr(hp_coords, 'relPosHPN') else None  # meters (m)
+        relPosE = (hp_coords.relPosHPE / 1000) if hasattr(hp_coords, 'relPosHPE') else None  # meters (m)
+        relPosD = (hp_coords.relPosHPD / 1000) if hasattr(hp_coords, 'relPosHPD') else None  # meters (m)
+        relPosLength = (hp_coords.relPosHPLength / 1000) if hasattr(hp_coords, 'relPosHPLength') else None  # meters (m)
+        relPosHeading = hp_coords.relPosHeading if hasattr(hp_coords, 'relPosHeading') else None  # degrees
+        velN = (hp_coords.velN / 1000) if hasattr(hp_coords, 'velN') else None  # meters per second (m/s)
+        velE = (hp_coords.velE / 1000) if hasattr(hp_coords, 'velE') else None  # meters per second (m/s)
+        velD = (hp_coords.velD / 1000) if hasattr(hp_coords, 'velD') else None  # meters per second (m/s)
+        speed = (hp_coords.speed / 1000) if hasattr(hp_coords, 'speed') else None  # meters per second (m/s)
 
         # Capture the current timestamp
         current_time = strftime("%Y-%m-%d %H:%M:%S")
@@ -107,6 +111,5 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: python recordDataToCsv.py <MowID>")
         sys.exit(1)
-    # mow_id = sys.argv[1]
-    mow_id = "11"
+    mow_id = sys.argv[1]
     run(mow_id)  # Run the main function with the provided Mow ID
