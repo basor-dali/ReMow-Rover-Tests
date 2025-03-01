@@ -1,7 +1,7 @@
 import serial
 import json
 from ublox_gps import UbloxGps
-from time import strftime, sleep
+from time import strftime, sleep, time
 import csv
 import logging
 import sys
@@ -86,6 +86,7 @@ def run(mow_id):
             gps = UbloxGps(port)  # Initialize GPS object
             try:
                 while True:
+                    start_time = time()  # Record the start time of the loop
                     telemetry = extract_gps_data(gps)  # Extract GPS data
                     if telemetry:
                         # Write data to CSV
@@ -95,9 +96,13 @@ def run(mow_id):
                         
                         # Flash GREEN LED
                         GREEN_LED.on()
-                        # sleep(0.1)
+                        sleep(0.1)
                         GREEN_LED.off()
-                    # sleep(1)  # Wait for 1 second before recording the next set of data
+                    
+                    # Calculate the elapsed time and adjust the sleep duration
+                    elapsed_time = time() - start_time
+                    logging.info(f"Elapsed time for this iteration: {elapsed_time:.2f} seconds")
+                    sleep(max(0, 1 - elapsed_time))  # Wait for the remaining time to complete 1 second
 
             except KeyboardInterrupt:
                 logging.info("Program interrupted by user")
