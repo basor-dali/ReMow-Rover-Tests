@@ -107,5 +107,6 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: python recordDataToCsv.py <MowID>")
         sys.exit(1)
-    mow_id = sys.argv[1]
+    # mow_id = sys.argv[1]
+    mow_id = "11"
     run(mow_id)  # Run the main function with the provided Mow ID
