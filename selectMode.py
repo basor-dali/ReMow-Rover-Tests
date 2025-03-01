@@ -32,7 +32,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Function to read a line of the keypad
 def readLine(line, characters):
-    line.on()  # Set the line to high
+    line.when_pressed = lambda: None  # Set the line to high
     if C1.is_pressed:
         return characters[0]
     if C2.is_pressed:
@@ -41,7 +41,7 @@ def readLine(line, characters):
         return characters[2]
     if C4.is_pressed:
         return characters[3]
-    line.off()  # Set the line back to low
+    line.when_released = lambda: None  # Set the line back to low
     return None
 
 # Function to determine the desired mode of operation
