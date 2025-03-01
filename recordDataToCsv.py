@@ -102,7 +102,9 @@ def run(mow_id):
                     # Calculate the elapsed time and adjust the sleep duration
                     elapsed_time = time() - start_time
                     logging.info(f"Elapsed time for this iteration: {elapsed_time:.2f} seconds")
-                    sleep(max(0, 1 - elapsed_time))  # Wait for the remaining time to complete 1 second
+                    sleep_duration = max(0, 1 - elapsed_time)
+                    logging.info(f"Sleeping for: {sleep_duration:.2f} seconds")
+                    sleep(sleep_duration)  # Wait for the remaining time to complete 1 second
 
             except KeyboardInterrupt:
                 logging.info("Program interrupted by user")
