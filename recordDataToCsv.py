@@ -97,7 +97,7 @@ def run(mow_id):
                         GREEN_LED.on()
                         sleep(0.1)
                         GREEN_LED.off()
-                    sleep(1)  # Wait for 1 second before recording the next set of data
+                    # sleep(1)  # Wait for 1 second before recording the next set of data
 
             except KeyboardInterrupt:
                 logging.info("Program interrupted by user")
