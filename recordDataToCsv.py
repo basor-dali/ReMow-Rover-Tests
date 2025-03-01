@@ -26,21 +26,19 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def extract_gps_data(gps):
     try:
         coords = gps.geo_coords()  # Get geographic coordinates
-        # hp_coords = gps.hp_geo_coords()  # Get high precision geographic coordinates
+        rel_pos = gps.rel_pos_ned()  # Get relative position and heading
 
-        # Log the coords and hp_coords objects
+        # Log the coords and rel_pos objects
         logging.info(f"coords: {coords}")
-        #logging.info(f"hp_coords: {hp_coords}")
+        logging.info(f"rel_pos: {rel_pos}")
 
         # Extract data with error handling
         latitude = coords.lat if coords else None  # degrees
         longitude = coords.lon if coords else None  # degrees
-        #height = hp_coords.height if hasattr(hp_coords, 'height') else None  # height above ellipsoid (mm)
-        #hMSL = hp_coords.hMSL if hasattr(hp_coords, 'hMSL') else None  # height above mean sea level (mm)
-        #heightHp = hp_coords.heightHp if hasattr(hp_coords, 'heightHp') else None  # high precision height above ellipsoid (mm)
-        #hMSLHp = hp_coords.hMSLHp if hasattr(hp_coords, 'hMSLHp') else None  # high precision height above mean sea level (mm)
-        #hAcc = hp_coords.hAcc if hasattr(hp_coords, 'hAcc') else None  # horizontal accuracy (mm)
-        #vAcc = hp_coords.vAcc if hasattr(hp_coords, 'vAcc') else None  # vertical accuracy (mm)
+        rel_north = rel_pos.relPosN if rel_pos else None  # relative North (cm)
+        rel_east = rel_pos.relPosE if rel_pos else None  # relative East (cm)
+        rel_down = rel_pos.relPosD if rel_pos else None  # relative Down (cm)
+        heading = rel_pos.heading if rel_pos else None  # heading (degrees)
 
         # Capture the current timestamp
         current_time = strftime("%Y-%m-%d %H:%M:%S")
@@ -50,12 +48,10 @@ def extract_gps_data(gps):
             "timestamp": current_time,  # timestamp
             "latitude": latitude,  # degrees
             "longitude": longitude,  # degrees
-            #"height": height,  # height above ellipsoid (mm)
-            #"hMSL": hMSL,  # height above mean sea level (mm)
-            #"heightHp": heightHp,  # high precision height above ellipsoid (mm)
-            #"hMSLHp": hMSLHp,  # high precision height above mean sea level (mm)
-            #"hAcc": hAcc,  # horizontal accuracy (mm)
-            #"vAcc": vAcc  # vertical accuracy (mm)
+            "rel_north": rel_north,  # relative North (cm)
+            "rel_east": rel_east,  # relative East (cm)
+            "rel_down": rel_down,  # relative Down (cm)
+            "heading": heading  # heading (degrees)
         }
         return telemetry
     except AttributeError as e:
