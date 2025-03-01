@@ -7,6 +7,7 @@ import logging
 import sys
 import os
 from gpiozero import LED
+import random
 
 # GPIO pin number for the GREEN LED
 GREEN_LED = LED(17)
@@ -61,6 +62,10 @@ def extract_gps_data(gps):
         logging.error(f"Error retrieving data: {e}")
         return None
 
+# Function to generate a random 2-digit Mow ID
+def generate_mow_id():
+    return f"{random.randint(10, 99)}"
+
 # Main function to run the GPS data logging
 def run(mow_id):
     logging.info("Listening for UBX Messages.")
@@ -102,8 +107,8 @@ def run(mow_id):
                 pass  # No need to clean up GPIO with gpiozero
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage: python recordDataToCsv.py <MowID>")
-        sys.exit(1)
-    mow_id = sys.argv[1]
-    run(mow_id)  # Run the main function with the provided Mow ID
+    # Generate a random 2-digit Mow ID
+    mow_id = generate_mow_id()
+    logging.info(f"Generated Mow ID: {mow_id}")
+    
+    run(mow_id)  # Run the main function with the generated Mow ID
