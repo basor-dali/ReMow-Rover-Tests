@@ -95,7 +95,7 @@ def run(mow_id):
                         
                         # Flash GREEN LED
                         GREEN_LED.on()
-                        sleep(0.1)
+                        # sleep(0.1)
                         GREEN_LED.off()
                     # sleep(1)  # Wait for 1 second before recording the next set of data
 
