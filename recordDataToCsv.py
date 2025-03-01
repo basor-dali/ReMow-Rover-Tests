@@ -34,15 +34,12 @@ def extract_gps_data(gps):
         # Extract data with error handling
         latitude = coords.lat if coords else None  # degrees
         longitude = coords.lon if coords else None  # degrees
-        relPosN = (hp_coords.relPosHPN / 1000) if hasattr(hp_coords, 'relPosHPN') else None  # meters (m)
-        relPosE = (hp_coords.relPosHPE / 1000) if hasattr(hp_coords, 'relPosHPE') else None  # meters (m)
-        relPosD = (hp_coords.relPosHPD / 1000) if hasattr(hp_coords, 'relPosHPD') else None  # meters (m)
-        relPosLength = (hp_coords.relPosHPLength / 1000) if hasattr(hp_coords, 'relPosHPLength') else None  # meters (m)
-        relPosHeading = hp_coords.relPosHeading if hasattr(hp_coords, 'relPosHeading') else None  # degrees
-        velN = (hp_coords.velN / 1000) if hasattr(hp_coords, 'velN') else None  # meters per second (m/s)
-        velE = (hp_coords.velE / 1000) if hasattr(hp_coords, 'velE') else None  # meters per second (m/s)
-        velD = (hp_coords.velD / 1000) if hasattr(hp_coords, 'velD') else None  # meters per second (m/s)
-        speed = (hp_coords.speed / 1000) if hasattr(hp_coords, 'speed') else None  # meters per second (m/s)
+        height = hp_coords.height if hasattr(hp_coords, 'height') else None  # height above ellipsoid (mm)
+        hMSL = hp_coords.hMSL if hasattr(hp_coords, 'hMSL') else None  # height above mean sea level (mm)
+        heightHp = hp_coords.heightHp if hasattr(hp_coords, 'heightHp') else None  # high precision height above ellipsoid (mm)
+        hMSLHp = hp_coords.hMSLHp if hasattr(hp_coords, 'hMSLHp') else None  # high precision height above mean sea level (mm)
+        hAcc = hp_coords.hAcc if hasattr(hp_coords, 'hAcc') else None  # horizontal accuracy (mm)
+        vAcc = hp_coords.vAcc if hasattr(hp_coords, 'vAcc') else None  # vertical accuracy (mm)
 
         # Capture the current timestamp
         current_time = strftime("%Y-%m-%d %H:%M:%S")
@@ -52,15 +49,12 @@ def extract_gps_data(gps):
             "timestamp": current_time,  # timestamp
             "latitude": latitude,  # degrees
             "longitude": longitude,  # degrees
-            "relPosN": relPosN,  # meters (m)
-            "relPosE": relPosE,  # meters (m)
-            "relPosD": relPosD,  # meters (m)
-            "relPosLength": relPosLength,  # meters (m)
-            "relPosHeading": relPosHeading,  # degrees
-            "velN": velN,  # meters per second (m/s)
-            "velE": velE,  # meters per second (m/s)
-            "velD": velD,  # meters per second (m/s)
-            "speed": speed  # meters per second (m/s)
+            "height": height,  # height above ellipsoid (mm)
+            "hMSL": hMSL,  # height above mean sea level (mm)
+            "heightHp": heightHp,  # high precision height above ellipsoid (mm)
+            "hMSLHp": hMSLHp,  # high precision height above mean sea level (mm)
+            "hAcc": hAcc,  # horizontal accuracy (mm)
+            "vAcc": vAcc  # vertical accuracy (mm)
         }
         return telemetry
     except AttributeError as e:
@@ -78,7 +72,7 @@ def run(mow_id):
     # Create a new CSV file with Mow ID and date/time in the filename
     filename = os.path.join(data_dir, f"{mow_id}_{strftime('%Y%m%d-%H%M%S')}_GPSData.csv")
     with open(filename, 'w', newline='') as csvfile:
-        fieldnames = ['timestamp', 'latitude', 'longitude', 'relPosN', 'relPosE', 'relPosD', 'relPosLength', 'relPosHeading', 'velN', 'velE', 'velD', 'speed']
+        fieldnames = ['timestamp', 'latitude', 'longitude', 'height', 'hMSL', 'heightHp', 'hMSLHp', 'hAcc', 'vAcc']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()  # Write the header row
 
