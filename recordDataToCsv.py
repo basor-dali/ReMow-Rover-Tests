@@ -1,6 +1,6 @@
 import serial
 import json
-from ublox_gps import UbloxGps
+from sparkfun_ublox_gps_remow import UbloxGps  # Updated import statement
 from time import strftime, sleep, time
 import csv
 import logging
@@ -35,10 +35,14 @@ def extract_gps_data(gps):
         # Extract data with error handling
         latitude = coords.lat if coords else None  # degrees
         longitude = coords.lon if coords else None  # degrees
-        rel_north = rel_pos.relPosN if rel_pos else None  # relative North (cm)
-        rel_east = rel_pos.relPosE if rel_pos else None  # relative East (cm)
-        rel_down = rel_pos.relPosD if rel_pos else None  # relative Down (cm)
+        speed = coords.gSpeed if coords else None  # speed (mm/s)
+        rel_north = (rel_pos.relPosN / 100) if rel_pos else None  # relative North (m)
+        rel_east = (rel_pos.relPosE / 100) if rel_pos else None  # relative East (m)
+        rel_down = (rel_pos.relPosD / 100) if rel_pos else None  # relative Down (m)
         heading = rel_pos.heading if rel_pos else None  # heading (degrees)
+
+        # Convert speed from mm/s to m/s
+        speed = speed / 1000 if speed is not None else None
 
         # Capture the current timestamp
         current_time = strftime("%Y-%m-%d %H:%M:%S")
@@ -48,9 +52,10 @@ def extract_gps_data(gps):
             "timestamp": current_time,  # timestamp
             "latitude": latitude,  # degrees
             "longitude": longitude,  # degrees
-            "rel_north": rel_north,  # relative North (cm)
-            "rel_east": rel_east,  # relative East (cm)
-            "rel_down": rel_down,  # relative Down (cm)
+            "speed": speed,  # speed (m/s)
+            "rel_north": rel_north,  # relative North (m)
+            "rel_east": rel_east,  # relative East (m)
+            "rel_down": rel_down,  # relative Down (m)
             "heading": heading  # heading (degrees)
         }
         return telemetry
@@ -73,13 +78,14 @@ def run(mow_id):
     # Create a new CSV file with Mow ID and date/time in the filename
     filename = os.path.join(data_dir, f"{mow_id}_{strftime('%Y%m%d-%H%M%S')}_GPSData.csv")
     with open(filename, 'w', newline='') as csvfile:
-        fieldnames = ['timestamp', 'latitude', 'longitude', 'height', 'hMSL', 'heightHp', 'hMSLHp', 'hAcc', 'vAcc']
+        fieldnames = ['timestamp', 'latitude', 'longitude', 'speed', 'rel_north', 'rel_east', 'rel_down', 'heading']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()  # Write the header row
 
         # Open serial port connection
         with serial.Serial('/dev/ttyAMA0', baudrate=38400, timeout=1) as port:
             gps = UbloxGps(port)  # Initialize GPS object
+            gps.enable_continuous_output()  # Enable continuous output
             try:
                 while True:
                     start_time = time()  # Record the start time of the loop
@@ -107,6 +113,7 @@ def run(mow_id):
             except Exception as e:
                 logging.error(f"Unexpected error: {e}")
             finally:
+                gps.disable_continuous_output()  # Disable continuous output
                 pass  # No need to clean up GPIO with gpiozero
 
 if __name__ == '__main__':
