@@ -26,20 +26,20 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def extract_gps_data(gps):
     try:
         coords = gps.geo_coords()  # Get geographic coordinates
-        hp_coords = gps.hp_geo_coords()  # Get high precision geographic coordinates
+        rel_pos = gps.request_standard_packet('NAV', 'RELPOSNED')  # Get relative position in NED coordinates
 
-        # Log the coords and hp_coords objects
+        # Log the coords and rel_pos objects
         logging.info(f"coords: {coords}")
-        logging.info(f"hp_coords: {hp_coords}")
+        logging.info(f"rel_pos: {rel_pos}")
 
         # Extract data with error handling
         latitude = coords.lat if coords else None  # degrees
         longitude = coords.lon if coords else None  # degrees
         speed = coords.gSpeed if coords else None  # speed (mm/s)
-        rel_north = (hp_coords.relPosHPN / 100) if hasattr(hp_coords, 'relPosHPN') else None  # relative North (m)
-        rel_east = (hp_coords.relPosHPE / 100) if hasattr(hp_coords, 'relPosHPE') else None  # relative East (m)
-        rel_down = (hp_coords.relPosHPD / 100) if hasattr(hp_coords, 'relPosHPD') else None  # relative Down (m)
-        heading = hp_coords.relPosHeading if hasattr(hp_coords, 'relPosHeading') else None  # heading (degrees)
+        rel_north = (rel_pos.relPosN / 100) if hasattr(rel_pos, 'relPosN') else None  # relative North (m)
+        rel_east = (rel_pos.relPosE / 100) if hasattr(rel_pos, 'relPosE') else None  # relative East (m)
+        rel_down = (rel_pos.relPosD / 100) if hasattr(rel_pos, 'relPosD') else None  # relative Down (m)
+        heading = rel_pos.relPosHeading if hasattr(rel_pos, 'relPosHeading') else None  # heading (degrees)
 
         # Convert speed from mm/s to m/s
         speed = speed / 1000 if speed is not None else None
