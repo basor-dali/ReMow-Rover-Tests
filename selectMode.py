@@ -114,7 +114,9 @@ def main():
 
     while True:
         logging.info("Waiting for user input...")
+        RED_LED.on()  # Light up red LED while waiting for user input
         mode = get_mode()
+        RED_LED.off()  # Turn off red LED once a valid mode is selected
         logging.info(f"User selected mode: {mode}")
 
         if mode == "A":  # RECORD
