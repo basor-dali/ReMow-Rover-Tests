@@ -47,14 +47,19 @@ logging.getLogger().addHandler(console_handler)
 # Function to read a line of the keypad
 def readLine(line, characters):
     line_state = line.is_pressed  # Check if the line button is pressed
+    logging.debug(f"Checking line {line.pin.number}: {line_state}")
     if line_state:
         if C1.is_pressed:
+            logging.debug(f"Button {characters[0]} pressed")
             return characters[0]
         if C2.is_pressed:
+            logging.debug(f"Button {characters[1]} pressed")
             return characters[1]
         if C3.is_pressed:
+            logging.debug(f"Button {characters[2]} pressed")
             return characters[2]
         if C4.is_pressed:
+            logging.debug(f"Button {characters[3]} pressed")
             return characters[3]
     return None
 
