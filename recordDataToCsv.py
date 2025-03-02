@@ -1,6 +1,6 @@
 import serial
 import json
-from sparkfun_ublox_gps import UbloxGps  # Corrected import statement
+from ublox_gps import UbloxGps  # Corrected import statement
 from time import strftime, sleep, time
 import csv
 import logging
@@ -85,7 +85,6 @@ def run(mow_id):
         # Open serial port connection
         with serial.Serial('/dev/ttyAMA0', baudrate=38400, timeout=1) as port:
             gps = UbloxGps(port)  # Initialize GPS object
-            gps.enable_continuous_output()  # Enable continuous output
             try:
                 while True:
                     start_time = time()  # Record the start time of the loop
@@ -113,7 +112,6 @@ def run(mow_id):
             except Exception as e:
                 logging.error(f"Unexpected error: {e}")
             finally:
-                gps.disable_continuous_output()  # Disable continuous output
                 pass  # No need to clean up GPIO with gpiozero
 
 if __name__ == '__main__':
