@@ -28,7 +28,21 @@ os.makedirs(log_dir, exist_ok=True)
 log_file = os.path.join(log_dir, f'selectMode_{strftime("%Y%m%d-%H%M%S")}.log')
 
 # Initialize logging with timestamp in every log message
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename=log_file, filemode='w')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Create a file handler for logging to a file
+file_handler = logging.FileHandler(log_file)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+# Create a console handler for logging to the terminal
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+# Add both handlers to the root logger
+logging.getLogger().addHandler(file_handler)
+logging.getLogger().addHandler(console_handler)
 
 # Function to read a line of the keypad
 def readLine(line, characters):
