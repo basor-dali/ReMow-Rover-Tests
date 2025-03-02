@@ -1,6 +1,6 @@
 import serial
 import json
-from sparkfun_ublox_gps_remow import UbloxGps  # Updated import statement
+from sparkfun_ublox_gps import UbloxGps  # Corrected import statement
 from time import strftime, sleep, time
 import csv
 import logging
