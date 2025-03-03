@@ -1,0 +1,127 @@
+2025-03-03 03:07:08,449 - INFO - Application started
+2025-03-03 03:07:08,450 - INFO - Starting main function
+2025-03-03 03:07:08,450 - INFO - Waiting for user input...
+2025-03-03 03:07:20,474 - INFO - User selected mode: A
+2025-03-03 03:07:20,474 - INFO - Mode A (RECORD) selected
+2025-03-03 03:07:20,474 - INFO - Enter a 2-digit combination
+2025-03-03 03:07:24,281 - INFO - Digit entered: 2
+2025-03-03 03:07:25,083 - INFO - Digit entered: 2
+2025-03-03 03:07:25,083 - INFO - Combination entered: 22
+2025-03-03 03:07:25,083 - INFO - No file with the combination found
+2025-03-03 03:07:30,585 - INFO - Triggering recording with combination: 22
+2025-03-03 03:07:30,585 - INFO - Running script: /home/dali/Documents/ReMow-Rover-Tests/recordDataToCsv.py
+2025-03-03 03:07:56,632 - INFO - Mode D pressed, terminating the recording process
+2025-03-03 03:07:56,732 - INFO - Subprocess output: 
+2025-03-03 03:07:56,733 - ERROR - Subprocess error: 
+2025-03-03 03:07:57,733 - INFO - Waiting for user input...
+2025-03-03 03:08:14,565 - INFO - User selected mode: A
+2025-03-03 03:08:14,566 - INFO - Mode A (RECORD) selected
+2025-03-03 03:08:14,566 - INFO - Enter a 2-digit combination
+2025-03-03 03:08:19,174 - INFO - Digit entered: 8
+2025-03-03 03:08:20,378 - INFO - Digit entered: 0
+2025-03-03 03:08:20,378 - INFO - Combination entered: 80
+2025-03-03 03:08:20,378 - INFO - No file with the combination found
+2025-03-03 03:08:25,880 - INFO - Triggering recording with combination: 80
+2025-03-03 03:08:25,880 - INFO - Running script: /home/dali/Documents/ReMow-Rover-Tests/recordDataToCsv.py
+2025-03-03 03:08:30,689 - INFO - Mode D pressed, terminating the recording process
+2025-03-03 03:08:30,790 - INFO - Subprocess output: 
+2025-03-03 03:08:30,791 - ERROR - Subprocess error: 
+2025-03-03 03:08:31,798 - INFO - Waiting for user input...
+2025-03-03 03:08:36,508 - INFO - User selected mode: A
+2025-03-03 03:08:36,508 - INFO - Mode A (RECORD) selected
+2025-03-03 03:08:36,508 - INFO - Enter a 2-digit combination
+2025-03-03 03:08:39,515 - INFO - Digit entered: 8
+2025-03-03 03:08:41,119 - INFO - Digit entered: 0
+2025-03-03 03:08:41,120 - INFO - Combination entered: 80
+2025-03-03 03:08:41,120 - INFO - File with the combination exists
+2025-03-03 03:08:47,120 - INFO - Waiting for user input...
+2025-03-03 03:09:39,311 - INFO - User selected mode: A
+2025-03-03 03:09:39,311 - INFO - Mode A (RECORD) selected
+2025-03-03 03:09:39,311 - INFO - Enter a 2-digit combination
+2025-03-03 03:09:42,518 - INFO - Digit entered: 7
+2025-03-03 03:09:43,721 - INFO - Digit entered: 4
+2025-03-03 03:09:43,721 - INFO - Combination entered: 74
+2025-03-03 03:09:43,721 - INFO - No file with the combination found
+2025-03-03 03:09:49,223 - INFO - Triggering recording with combination: 74
+2025-03-03 03:09:49,223 - INFO - Running script: /home/dali/Documents/ReMow-Rover-Tests/recordDataToCsv.py
+2025-03-03 03:09:57,339 - INFO - Mode D pressed, terminating the recording process
+2025-03-03 03:09:57,439 - INFO - Subprocess output: 
+2025-03-03 03:09:57,439 - ERROR - Subprocess error: 
+2025-03-03 03:09:58,440 - INFO - Waiting for user input...
+2025-03-03 03:10:03,551 - INFO - User selected mode: A
+2025-03-03 03:10:03,551 - INFO - Mode A (RECORD) selected
+2025-03-03 03:10:03,551 - INFO - Enter a 2-digit combination
+2025-03-03 03:10:05,957 - INFO - Digit entered: 7
+2025-03-03 03:10:07,361 - INFO - Digit entered: 4
+2025-03-03 03:10:07,361 - INFO - Combination entered: 74
+2025-03-03 03:10:07,361 - INFO - File with the combination exists
+2025-03-03 03:10:13,362 - INFO - Waiting for user input...
+2025-03-03 03:10:17,170 - INFO - User selected mode: A
+2025-03-03 03:10:17,170 - INFO - Mode A (RECORD) selected
+2025-03-03 03:10:17,171 - INFO - Enter a 2-digit combination
+2025-03-03 03:10:18,976 - INFO - Digit entered: 2
+2025-03-03 03:10:21,180 - INFO - Digit entered: 6
+2025-03-03 03:10:21,180 - INFO - Combination entered: 26
+2025-03-03 03:10:21,181 - INFO - No file with the combination found
+2025-03-03 03:10:26,682 - INFO - Triggering recording with combination: 26
+2025-03-03 03:10:26,682 - INFO - Running script: /home/dali/Documents/ReMow-Rover-Tests/recordDataToCsv.py
+2025-03-03 03:10:59,025 - INFO - Mode D pressed, terminating the recording process
+2025-03-03 03:10:59,125 - INFO - Subprocess output: 
+2025-03-03 03:10:59,126 - ERROR - Subprocess error: 
+2025-03-03 03:11:00,126 - INFO - Waiting for user input...
+2025-03-03 03:11:07,643 - INFO - User selected mode: D
+2025-03-03 03:11:07,643 - INFO - Mode D selected
+2025-03-03 03:11:08,643 - INFO - Waiting for user input...
+2025-03-03 03:11:32,008 - INFO - User selected mode: A
+2025-03-03 03:11:32,008 - INFO - Mode A (RECORD) selected
+2025-03-03 03:11:32,008 - INFO - Enter a 2-digit combination
+2025-03-03 03:11:34,014 - INFO - Digit entered: 5
+2025-03-03 03:11:34,815 - INFO - Digit entered: 2
+2025-03-03 03:11:34,816 - INFO - Combination entered: 52
+2025-03-03 03:11:34,816 - INFO - No file with the combination found
+2025-03-03 03:11:40,317 - INFO - Triggering recording with combination: 52
+2025-03-03 03:11:40,318 - INFO - Running script: /home/dali/Documents/ReMow-Rover-Tests/recordDataToCsv.py
+2025-03-03 03:11:45,928 - INFO - Mode D pressed, terminating the recording process
+2025-03-03 03:11:46,029 - INFO - Subprocess output: 
+2025-03-03 03:11:46,029 - ERROR - Subprocess error: 
+2025-03-03 03:11:47,029 - INFO - Waiting for user input...
+2025-03-03 03:11:52,240 - INFO - User selected mode: D
+2025-03-03 03:11:52,240 - INFO - Mode D selected
+2025-03-03 03:11:53,241 - INFO - Waiting for user input...
+2025-03-03 03:11:55,447 - INFO - User selected mode: D
+2025-03-03 03:11:55,447 - INFO - Mode D selected
+2025-03-03 03:11:56,447 - INFO - Waiting for user input...
+2025-03-03 03:11:58,051 - INFO - User selected mode: D
+2025-03-03 03:11:58,051 - INFO - Mode D selected
+2025-03-03 03:11:59,051 - INFO - Waiting for user input...
+2025-03-03 03:13:40,319 - INFO - User selected mode: A
+2025-03-03 03:13:40,319 - INFO - Mode A (RECORD) selected
+2025-03-03 03:13:40,320 - INFO - Enter a 2-digit combination
+2025-03-03 03:13:44,126 - INFO - Digit entered: 5
+2025-03-03 03:13:44,928 - INFO - Digit entered: 6
+2025-03-03 03:13:44,929 - INFO - Combination entered: 56
+2025-03-03 03:13:44,929 - INFO - No file with the combination found
+2025-03-03 03:13:50,431 - INFO - Triggering recording with combination: 56
+2025-03-03 03:13:50,431 - INFO - Running script: /home/dali/Documents/ReMow-Rover-Tests/recordDataToCsv.py
+2025-03-03 03:13:57,444 - INFO - Mode D pressed, terminating the recording process
+2025-03-03 03:13:57,544 - INFO - Subprocess output: 
+2025-03-03 03:13:57,545 - ERROR - Subprocess error: 
+2025-03-03 03:13:58,545 - INFO - Waiting for user input...
+2025-03-03 03:14:02,353 - INFO - User selected mode: A
+2025-03-03 03:14:02,353 - INFO - Mode A (RECORD) selected
+2025-03-03 03:14:02,354 - INFO - Enter a 2-digit combination
+2025-03-03 03:14:03,957 - INFO - Digit entered: 5
+2025-03-03 03:14:05,161 - INFO - Digit entered: 6
+2025-03-03 03:14:05,161 - INFO - Combination entered: 56
+2025-03-03 03:14:05,161 - INFO - File with the combination exists
+2025-03-03 03:14:11,161 - INFO - Waiting for user input...
+2025-03-03 03:14:14,869 - INFO - User selected mode: A
+2025-03-03 03:14:14,869 - INFO - Mode A (RECORD) selected
+2025-03-03 03:14:14,869 - INFO - Enter a 2-digit combination
+2025-03-03 03:14:20,478 - INFO - Digit entered: 5
+2025-03-03 03:14:21,279 - INFO - Digit entered: 6
+2025-03-03 03:14:21,279 - INFO - Combination entered: 56
+2025-03-03 03:14:21,279 - INFO - File with the combination exists
+2025-03-03 03:14:27,279 - INFO - Waiting for user input...
+2025-03-03 03:16:41,932 - INFO - 
+Application stopped!

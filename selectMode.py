@@ -1,23 +1,23 @@
 import os
 import subprocess
 import logging
-from time import strftime, sleep
-import psutil
-from gpiozero import LED, Button
+from time import strftime, sleep, time
+from gpiozero import LED, Button, OutputDevice
+import gpiozero  # Import gpiozero to handle exceptions
 
 # GPIO pin numbers for the keypad
-L1 = Button(5)
-L2 = Button(6)
-L3 = Button(13)
-L4 = Button(19)
+L1 = OutputDevice(5)
+L2 = OutputDevice(6)
+L3 = OutputDevice(13)
+L4 = OutputDevice(19)
 
-C1 = Button(12, pull_up=False)
-C2 = Button(16, pull_up=False)
-C3 = Button(20, pull_up=False)
-C4 = Button(21, pull_up=False)
+C1 = Button(12, pull_up=False, bounce_time=0.1)
+C2 = Button(16, pull_up=False, bounce_time=0.1)
+C3 = Button(20, pull_up=False, bounce_time=0.1)
+C4 = Button(21, pull_up=False, bounce_time=0.1)
 
 # GPIO pin numbers for the LEDs
-GREEN_LED = LED(17)
+BLUE_LED = LED(22)
 RED_LED = LED(27)
 
 # Create the "Logs" directory if it doesn't exist
@@ -44,133 +44,161 @@ console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(
 logging.getLogger().addHandler(file_handler)
 logging.getLogger().addHandler(console_handler)
 
+last_states = {
+    'C1': False, 'C2': False, 'C3': False, 'C4': False
+}
+last_press_time = {
+    'C1': 0, 'C2': 0, 'C3': 0, 'C4': 0
+}
+debounce_time = 0.5  # 500 milliseconds debounce time
+
 # Function to read a line of the keypad
-def readLine(line, characters):
-    line_state = line.is_pressed  # Check if the line button is pressed
-    logging.debug(f"Checking line {line.pin.number}: {line_state}")
-    if line_state:
-        if C1.is_pressed:
-            logging.debug(f"Button {characters[0]} pressed")
-            return characters[0]
-        if C2.is_pressed:
-            logging.debug(f"Button {characters[1]} pressed")
-            return characters[1]
-        if C3.is_pressed:
-            logging.debug(f"Button {characters[2]} pressed")
-            return characters[2]
-        if C4.is_pressed:
-            logging.debug(f"Button {characters[3]} pressed")
-            return characters[3]
+def read_line(line, characters):
+    line.on()
+    current_states = {
+        'C1': C1.is_pressed,
+        'C2': C2.is_pressed,
+        'C3': C3.is_pressed,
+        'C4': C4.is_pressed
+    }
+    
+    current_time = time()
+    for i, (col, state) in enumerate(current_states.items()):
+        if state and not last_states[col] and (current_time - last_press_time[col] > debounce_time):
+            last_press_time[col] = current_time
+            line.off()
+            return characters[i]
+        last_states[col] = state
+    
+    line.off()
     return None
 
 # Function to determine the desired mode of operation
 def get_mode():
     while True:
-        mode = None
-        mode = readLine(L1, ["1", "2", "3", "A"])
+        mode = read_line(L1, ["1", "2", "3", "A"])
         if mode: return mode
-        mode = readLine(L2, ["4", "5", "6", "B"])
+        mode = read_line(L2, ["4", "5", "6", "B"])
         if mode: return mode
-        mode = readLine(L3, ["7", "8", "9", "C"])
+        mode = read_line(L3, ["7", "8", "9", "C"])
         if mode: return mode
-        mode = readLine(L4, ["*", "0", "#", "D"])
+        mode = read_line(L4, ["*", "0", "#", "D"])
         if mode: return mode
         sleep(0.1)
 
-# Function to read a 2-digit combination
-def read_2_digit_combination():
-    digits = ""
-    while len(digits) < 2:
-        digit = get_mode()
-        if digit.isdigit():
-            digits += digit
-            logging.info(f"Digit entered: {digit}")
-    return digits
+# Function to monitor for 'D' press and kill the subprocess
+def monitor_for_stop(process):
+    while process.poll() is None:  # While the process is still running
+        if read_line(L4, ["*", "0", "#", "D"]) == "D":
+            logging.info("Mode D pressed, terminating the recording process")
+            process.terminate()
+        sleep(0.1)
 
-# Function to check if a Mow ID already exists
-def check_mow_id(mow_id):
-    for file in os.listdir("."):
-        if file.endswith(".csv") and file.startswith(mow_id):
+def get_combination():
+    combination = ""
+    while len(combination) < 2:
+        digit = read_line(L1, ["1", "2", "3", "A"]) or \
+                read_line(L2, ["4", "5", "6", "B"]) or \
+                read_line(L3, ["7", "8", "9", "C"]) or \
+                read_line(L4, ["*", "0", "#", "D"])
+        if digit and digit.isdigit():
+            combination += digit
+            logging.info(f"Digit entered: {digit}")
+        else:
+            # Flash BLUE LED while waiting for user input
+            BLUE_LED.on()
+            sleep(0.1)
+            BLUE_LED.off()
+            sleep(0.1)
+    return combination
+
+def validate_combination(combination):
+    data_dir = os.path.join(os.path.dirname(__file__), 'Data')
+    if not os.path.exists(data_dir):
+        logging.info("Data directory does not exist")
+        return False
+    for filename in os.listdir(data_dir):
+        if filename.startswith(combination):
             return True
     return False
 
-# Function to check if there is at least 10% free memory
-def check_memory():
-    memory = psutil.virtual_memory()
-    free_memory_percentage = memory.available / memory.total * 100
-    logging.info(f"Free memory: {free_memory_percentage:.2f}%")
-    return free_memory_percentage >= 10
+def cleanup_gpio():
+    try:
+        BLUE_LED.off()
+        RED_LED.off()
+    except gpiozero.exc.GPIODeviceClosed:
+        logging.warning("Attempted to turn off an already closed or uninitialized LED")
+    finally:
+        BLUE_LED.close()
+        RED_LED.close()
+
+def trigger_recording(combination):
+    script_path = os.path.join(os.path.dirname(__file__), 'recordDataToCsv.py')
+    logging.info(f"Triggering recording with combination: {combination}")
+    logging.info(f"Running script: {script_path}")
+    process = subprocess.Popen(['python3', script_path, combination], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    monitor_for_stop(process)
+    stdout, stderr = process.communicate()
+    logging.info(f"Subprocess output: {stdout}")
+    logging.error(f"Subprocess error: {stderr}")
 
 # Main function
 def main():
-    logging.info("Initializing Output Settings")
-    DLAP = 0.0
-    DRAP = 0.0
-    logging.info(f"Desired Left Actuator Position (DLAP) = {DLAP}, Send Output Command")
-    logging.info(f"Desired Right Actuator Position (DRAP) = {DRAP}, Send Output Command")
-    logging.info("De-Energize Electronic Blade Clutch Control Solenoid")
-
-    record_process = None
-
+    logging.info("Starting main function")
     while True:
         logging.info("Waiting for user input...")
-        RED_LED.on()  # Light up red LED while waiting for user input
+        try:
+            logging.debug("Turning on BLUE LED")
+            if BLUE_LED.closed:
+                logging.error("BLUE LED is closed or uninitialized")
+            else:
+                BLUE_LED.on()  # Light up blue LED while waiting for user input
+        except gpiozero.exc.GPIODeviceClosed:
+            logging.warning("Attempted to turn on an already closed or uninitialized LED")
         mode = get_mode()
-        RED_LED.off()  # Turn off red LED once a valid mode is selected
+        try:
+            logging.debug("Flashing BLUE LED")
+            for _ in range(5):  # Flash blue LED for 1 seconds (5 * 200ms)
+                BLUE_LED.on()
+                sleep(0.1)
+                BLUE_LED.off()
+                sleep(0.1)
+        except gpiozero.exc.GPIODeviceClosed:
+            logging.warning("Attempted to turn on/off an already closed or uninitialized LED")
         logging.info(f"User selected mode: {mode}")
 
-        if mode == "A":  # RECORD
-            logging.info("RECORD mode selected")
-            while True:
-                logging.info("Enter 2-digit Mow ID:")
-                mow_id = read_2_digit_combination()
-                if check_mow_id(mow_id):
-                    logging.info("Mow ID already exists. Please enter a new Mow ID.")
-                    RED_LED.on()  # Light up red LED
-                    sleep(2)
-                    RED_LED.off()  # Turn off red LED
-                else:
-                    if check_memory():
-                        logging.info(f"Mow ID: {mow_id}")
-                        GREEN_LED.on()  # Light up green LED
-                        # Trigger recordDataToCsv.py with the Mow ID
-                        record_process = subprocess.Popen(['python', 'recordDataToCsv.py', mow_id])
-                        while True:
-                            stop_mode = get_mode()
-                            if stop_mode == "D":  # STOP
-                                logging.info("STOP mode selected")
-                                if record_process:
-                                    record_process.terminate()  # Terminate the recordDataToCsv.py process
-                                    record_process = None
-                                logging.info("Desired Left Actuator Position (DLAP) = 0.0, Send Output Command")
-                                logging.info("Desired Right Actuator Position (DRAP) = 0.0, Send Output Command")
-                                logging.info("De-Energize Electronic Blade Clutch Control Solenoid")
-                                GREEN_LED.off()  # Turn off green LED
-                                break
-                        break
-                    else:
-                        logging.info("Not enough free memory to start recording.")
-                        RED_LED.on()  # Light up red LED
-                        sleep(2)
-                        RED_LED.off()  # Turn off red LED
-                        break
-        elif mode == "B":  # RE-MOW
-            logging.info("RE-MOW mode selected")
-            logging.info("Enter 2-digit Mow ID:")
-            mow_id = read_2_digit_combination()
-            logging.info(f"Mow ID: {mow_id}")
-            # Additional logic for re-mowing
-        elif mode == "C":  # MOW MANUALLY
-            logging.info("MOW MANUALLY mode selected")
-            logging.info("Energize Electronic Blade Clutch Control Solenoid")
-        elif mode == "D":  # STOP
-            logging.info("STOP mode selected")
-            if record_process:
-                record_process.terminate()  # Terminate the recordDataToCsv.py process
-                record_process = None
-            logging.info("Desired Left Actuator Position (DLAP) = 0.0, Send Output Command")
-            logging.info("Desired Right Actuator Position (DRAP) = 0.0, Send Output Command")
-            logging.info("De-Energize Electronic Blade Clutch Control Solenoid")
+        if mode == "A":
+            logging.info("Mode A (RECORD) selected")
+            logging.info("Enter a 2-digit combination")
+            combination = get_combination()
+            logging.info(f"Combination entered: {combination}")
+            if validate_combination(combination):
+                logging.info("File with the combination exists")
+                try:
+                    logging.debug("Turning on BLUE LED")
+                    RED_LED.on()
+                    sleep(5)
+                    RED_LED.off()
+                except gpiozero.exc.GPIODeviceClosed:
+                    logging.warning("Attempted to turn on/off an already closed or uninitialized LED")
+            else:
+                logging.info("No file with the combination found")
+                try:
+                    logging.debug("Turning on BLUE LED")
+                    for _ in range(5):  # Flash blue LED for 6 seconds (5 * 1100ms)
+                        BLUE_LED.on()
+                        sleep(1)
+                        BLUE_LED.off()
+                        sleep(.1)
+                except gpiozero.exc.GPIODeviceClosed:
+                    logging.warning("Attempted to turn on/off an already closed or uninitialized LED")
+                trigger_recording(combination)
+        elif mode == "B":
+            logging.info("Mode B selected")
+        elif mode == "C":
+            logging.info("Mode C selected")
+        elif mode == "D":
+            logging.info("Mode D selected")
         else:
             logging.info("Invalid mode selected")
 
@@ -178,6 +206,8 @@ def main():
 
 if __name__ == "__main__":
     try:
+        logging.info("Application started")
         main()
     except KeyboardInterrupt:
         logging.info("\nApplication stopped!")
+        cleanup_gpio()

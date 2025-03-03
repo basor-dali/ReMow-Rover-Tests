@@ -6,11 +6,12 @@ import csv
 import logging
 import sys
 import os
+import gpiozero
 from gpiozero import LED
 import random
 
 # GPIO pin number for the GREEN LED
-GREEN_LED = LED(17)
+GREEN_LED_PIN = 17
 
 # Create the "Logs" directory if it doesn't exist
 log_dir = os.path.join(os.path.dirname(__file__), 'Logs')
@@ -21,6 +22,30 @@ log_file = os.path.join(log_dir, f'recordDataToCsv_{strftime("%Y%m%d-%H%M%S")}.l
 
 # Initialize logging with timestamp in every log message
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename=log_file, filemode='w')
+
+# Function to initialize the GREEN_LED with retries
+def initialize_green_led(retries=3, delay=1):
+    for attempt in range(retries):
+        try:
+            green_led = LED(GREEN_LED_PIN)
+            return green_led
+        except gpiozero.exc.GPIOPinInUse:
+            logging.error(f"GPIO pin {GREEN_LED_PIN} is already in use, attempt {attempt + 1} of {retries}")
+            sleep(delay)
+        except Exception as e:
+            logging.error(f"Unexpected error initializing GREEN_LED: {e}")
+            return None
+    return None
+
+# Function to cleanup GPIO
+def cleanup_gpio(led):
+    if led:
+        try:
+            led.off()
+        except gpiozero.exc.GPIODeviceClosed:
+            logging.warning("Attempted to turn off an already closed or uninitialized LED")
+        finally:
+            led.close()
 
 # Function to extract GPS data with error handling
 def extract_gps_data(gps):
@@ -85,38 +110,47 @@ def run(mow_id):
         # Open serial port connection
         with serial.Serial('/dev/ttyAMA0', baudrate=38400, timeout=1) as port:
             gps = UbloxGps(port)  # Initialize GPS object
-            try:
-                while True:
-                    start_time = time()  # Record the start time of the loop
-                    telemetry = extract_gps_data(gps)  # Extract GPS data
-                    if telemetry:
-                        # Write data to CSV
-                        writer.writerow(telemetry)
-                        csvfile.flush()  # Ensure data is written to the file
-                        logging.info(f"Data written to CSV: {telemetry}")
+            green_led = initialize_green_led()
+            if green_led:
+                try:
+                    while True:
+                        start_time = time()  # Record the start time of the loop
+                        telemetry = extract_gps_data(gps)  # Extract GPS data
+                        if telemetry:
+                            # Write data to CSV
+                            writer.writerow(telemetry)
+                            csvfile.flush()  # Ensure data is written to the file
+                            logging.info(f"Data written to CSV: {telemetry}")
+                            
+                            # Flash GREEN LED
+                            try:
+                                green_led.on()
+                                sleep(0.1)
+                                green_led.off()
+                            except Exception as e:
+                                logging.error(f"Error initializing GPIO: {e}")
                         
-                        # Flash GREEN LED
-                        GREEN_LED.on()
-                        sleep(0.1)
-                        GREEN_LED.off()
-                    
-                    # Calculate the elapsed time and adjust the sleep duration
-                    elapsed_time = time() - start_time
-                    logging.info(f"Elapsed time for this iteration: {elapsed_time:.2f} seconds")
-                    sleep_duration = max(0, 1 - elapsed_time)
-                    logging.info(f"Sleeping for: {sleep_duration:.2f} seconds")
-                    sleep(sleep_duration)  # Wait for the remaining time to complete 1 second
+                        # Calculate the elapsed time and adjust the sleep duration
+                        elapsed_time = time() - start_time
+                        logging.info(f"Elapsed time for this iteration: {elapsed_time:.2f} seconds")
+                        sleep_duration = max(0, 1 - elapsed_time)
+                        logging.info(f"Sleeping for: {sleep_duration:.2f} seconds")
+                        sleep(sleep_duration)  # Wait for the remaining time to complete 1 second
 
-            except KeyboardInterrupt:
-                logging.info("Program interrupted by user")
-            except Exception as e:
-                logging.error(f"Unexpected error: {e}")
-            finally:
-                pass  # No need to clean up GPIO with gpiozero
+                except KeyboardInterrupt:
+                    logging.info("Program interrupted by user")
+                except Exception as e:
+                    logging.error(f"Unexpected error: {e}")
+                finally:
+                    cleanup_gpio(green_led)
+            else:
+                logging.error("Failed to initialize GREEN_LED, proceeding without LED")
 
 if __name__ == '__main__':
-    # Generate a random 2-digit Mow ID
-    mow_id = generate_mow_id()
-    logging.info(f"Generated Mow ID: {mow_id}")
+    if len(sys.argv) != 2:
+        logging.error("Usage: python3 recordDataToCsv.py <combination>")
+        sys.exit(1)
+    combination = sys.argv[1]
+    logging.info(f"Generated Mow ID: {combination}")
     
-    run(mow_id)  # Run the main function with the generated Mow ID
+    run(combination)  # Run the main function with the generated Mow ID
