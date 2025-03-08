@@ -1,6 +1,6 @@
 import serial
 import json
-from ublox_gps import UbloxGps  # Corrected import statement
+from ublox_gps import UbloxGps
 from time import strftime, sleep, time
 import csv
 import logging
@@ -8,7 +8,6 @@ import sys
 import os
 import gpiozero
 from gpiozero import LED
-import random
 
 # GPIO pin number for the GREEN LED
 GREEN_LED_PIN = 17
@@ -87,10 +86,6 @@ def extract_gps_data(gps):
     except AttributeError as e:
         logging.error(f"Error retrieving data: {e}")
         return None
-
-# Function to generate a random 2-digit Mow ID
-def generate_mow_id():
-    return f"{random.randint(10, 99)}"
 
 # Main function to run the GPS data logging
 def run(mow_id):
