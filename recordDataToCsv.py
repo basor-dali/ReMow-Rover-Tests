@@ -103,7 +103,7 @@ def run(mow_id):
         writer.writeheader()  # Write the header row
 
         # Open serial port connection
-        with serial.Serial('/dev/ttyAMA0', baudrate=38400, timeout=1) as port:
+        with serial.Serial('/dev/ttyAMA0', baudrate=38400, timeout=0.2) as port:
             gps = UbloxGps(port)  # Initialize GPS object
             green_led = initialize_green_led()
             if green_led:
