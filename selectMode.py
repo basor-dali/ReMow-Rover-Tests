@@ -133,7 +133,8 @@ def cleanup_gpio():
         RED_LED.close()
 
 def trigger_recording(combination):
-    script_path = os.path.join(os.path.dirname(__file__), 'recordDataToCsv.py')
+    # script_path = os.path.join(os.path.dirname(__file__), 'recordDataToCsv.py')
+    script_path = os.path.join(os.path.dirname(__file__), 'jeanClaude.py')
     logging.info(f"Triggering recording with combination: {combination}")
     logging.info(f"Running script: {script_path}")
     process = subprocess.Popen(['python3', script_path, combination], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)

@@ -103,9 +103,16 @@ def run(mow_id):
         writer.writeheader()  # Write the header row
 
         # Open serial port connection
-        with serial.Serial('/dev/ttyAMA0', baudrate=38400, timeout=0.2) as port:
+        with serial.Serial('/dev/ttyAMA0', baudrate=38400, timeout=1) as port:
             gps = UbloxGps(port)  # Initialize GPS object
+            try:
+                # Set measurement rate to 1000ms (1Hz)
+                gps.configure_solution_rate(measurement_rate=1000, navigation_rate=1, time_reference=0)
+                logging.info("GPS module configured for 1Hz output rate")
+            except Exception as e:
+                logging.error(f"Error configuring GPS rate: {e}")
             green_led = initialize_green_led()
+            
             if green_led:
                 try:
                     while True:
