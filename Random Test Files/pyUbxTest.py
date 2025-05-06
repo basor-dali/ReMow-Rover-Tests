@@ -18,8 +18,9 @@ def log_serial_data():
         # Write CSV header
         writer.writerow(['timestamp', 'latitude', 'longitude', 'speed', 'rel_north', 'rel_east', 'rel_down', 'heading'])
 
-        # Open the serial port
-        with Serial('/dev/ttyAMA0', 230400, timeout=1) as stream:
+        # Open the serial port 57600
+        # with Serial('/dev/ttyAMA0', 230400, timeout=1) as stream:
+        with Serial('/dev/ttyAMA0', 57600,timeout=1)as stream:
             # Configure UBXReader to parse both UBX and NMEA messages
             ubr = UBXReader(stream, protfilter=UBX_PROTOCOL | NMEA_PROTOCOL)
             print(f"Logging specific fields to {filename}. Press Ctrl+C to stop.")

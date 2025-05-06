@@ -134,7 +134,7 @@ def cleanup_gpio():
 
 def trigger_recording(combination):
     # script_path = os.path.join(os.path.dirname(__file__), 'recordDataToCsv.py')
-    script_path = os.path.join(os.path.dirname(__file__), 'parseAndRecordData.py')
+    script_path = os.path.join(os.path.dirname(__file__), 'Record/parseAndRecordData.py')
     logging.info(f"Triggering recording with combination: {combination}")
     logging.info(f"Running script: {script_path}")
     process = subprocess.Popen(['python3', script_path, combination], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -144,6 +144,28 @@ def trigger_recording(combination):
     logging.error(f"Subprocess error: {stderr}")
 
 # Main function
+def trigger_read_recorded_run(combination):
+    """Trigger the readRecordedRun.py subprocess."""
+    script_path = os.path.join(os.path.dirname(__file__), 'Repeat/readRecordedRun.py')
+    logging.info(f"Triggering readRecordedRun with combination: {combination}")
+    logging.info(f"Running script: {script_path}")
+    process = subprocess.Popen(['python3', script_path, combination], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    monitor_for_stop(process)  # Monitor for "D" press to stop the process
+    stdout, stderr = process.communicate()
+    logging.info(f"Subprocess output: {stdout}")
+    logging.error(f"Subprocess error: {stderr}")
+
+def validate_file_in_data(combination):
+    """Check if a file starting with the combination exists in Record/Data."""
+    data_dir = os.path.join(os.path.dirname(__file__), 'Record/Data')
+    if not os.path.exists(data_dir):
+        logging.info("Data directory does not exist")
+        return False
+    for filename in os.listdir(data_dir):
+        if filename.startswith(combination):
+            return True
+    return False
+
 def main():
     logging.info("Starting main function")
     while True:
@@ -159,7 +181,7 @@ def main():
         mode = get_mode()
         try:
             logging.debug("Flashing BLUE LED")
-            for _ in range(5):  # Flash blue LED for 1 seconds (5 * 200ms)
+            for _ in range(5):  # Flash blue LED for 1 second (5 * 200ms)
                 BLUE_LED.on()
                 sleep(0.1)
                 BLUE_LED.off()
@@ -196,6 +218,23 @@ def main():
                 trigger_recording(combination)
         elif mode == "B":
             logging.info("Mode B selected")
+            logging.info("Enter a 2-digit combination")
+            combination = get_combination()
+            logging.info(f"Combination entered: {combination}")
+            if validate_file_in_data(combination):
+                logging.info(f"File with ID {combination} found in Record/Data")
+                trigger_read_recorded_run(combination)
+            else:
+                logging.info(f"No file with ID {combination} found in Record/Data")
+                try:
+                    logging.debug("Flashing RED LED")
+                    for _ in range(5):  # Flash RED LED for 1 second (5 * 200ms)
+                        RED_LED.on()
+                        sleep(0.1)
+                        RED_LED.off()
+                        sleep(0.1)
+                except gpiozero.exc.GPIODeviceClosed:
+                    logging.warning("Attempted to turn on/off an already closed or uninitialized LED")
         elif mode == "C":
             logging.info("Mode C selected")
         elif mode == "D":
